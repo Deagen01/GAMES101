@@ -73,6 +73,8 @@ public:
     Vector3f evalDiffuseColor(const Vector2f&) const override;
     Bounds3 getBounds() override;
     void Sample(Intersection &pos, float &pdf){
+        //随机生成三角形内部的一个点
+        //先生成两个随机数 然后通过重心坐标生成一个三角形内部的点
         float x = std::sqrt(get_random_float()), y = get_random_float();
         pos.coords = v0 * (1.0f - x) + v1 * (x * (1.0f - y)) + v2 * (x * y);
         pos.normal = this->normal;
@@ -253,7 +255,12 @@ inline Intersection Triangle::getIntersection(Ray ray)
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
     // TODO find ray triangle intersection
-
+    inter.happened = true;
+    inter.coords = ray.origin + ray.direction * t_tmp;
+    inter.m = this->m;
+    inter.normal = normal;
+    inter.obj = this;
+    inter.distance = t_tmp;
     return inter;
 }
 

@@ -96,7 +96,41 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     // invDir: ray direction(x,y,z), invDir=(1.0/x,1.0/y,1.0/z), use this because Multiply is faster that Division
     // dirIsNeg: ray direction(x,y,z), dirIsNeg=[int(x>0),int(y>0),int(z>0)], use this to simplify your logic
     // TODO test if ray bound intersects
-
+    Vector3f origin = ray.origin;
+    Vector3f direction = ray.direction;
+    Vector3f pMin = this->pMin;
+    Vector3f pMax = this->pMax;
+    //min表示各个轴上进入的时间
+    //只有都进入三个轴才能进入bounds
+    //所以要mint的最大值
+    float txMin = (pMin.x - origin.x)*invDir[0];
+    float tyMin = (pMin.y - origin.y)*invDir[1];
+    float tzMin = (pMin.z - origin.z)*invDir[2];
+    float txMax = (pMax.x - origin.x)*invDir[0];
+    float tyMax = (pMax.y - origin.y)*invDir[1];
+    float tzMax = (pMax.z - origin.z)*invDir[2];
+    //如果在某个轴上的方向为负值
+    //表示光线的路径与pMin和pMax的关系相反
+    //需要交换进入时间和退出时间
+    if(dirIsNeg[0]){
+        std::swap(txMin,txMax);
+    }
+    if(dirIsNeg[1]){
+        std::swap(tyMin,tyMax);
+    }
+    if(dirIsNeg[2]){
+        std::swap(tzMin,tzMax);
+    }
+    //tEnter是最大的进入t值
+    float tEnter = std::max(txMin,std::max(tyMin,tzMin));
+    float tExit = std::min(txMax,std::min(tyMax,tzMax));
+    //tExit<0且tEnter>0表示光源在物体内部 有且仅有一个交点
+    //所以当tEnter<0则不存在交点
+    if( tEnter < 0){
+        return false;
+    }
+    //tExit = tEnter是也有交点的？
+    return true;
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)

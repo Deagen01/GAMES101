@@ -128,14 +128,20 @@ Vector3f Material::getColorAt(double u, double v) {
     return Vector3f();
 }
 
-
+//根据入射方向和法线，生成一个出射方向
 Vector3f Material::sample(const Vector3f &wi, const Vector3f &N){
     switch(m_type){
         case DIFFUSE:
         {
             // uniform sample on the hemisphere
+            // x2用于随机生成phi
+            //x1 随机生成theta相关的z
+            //z = r*cos(theta)
+            //phi是投影到xy平面的向量与x轴的夹角
             float x_1 = get_random_float(), x_2 = get_random_float();
+            //z是在[-1,1]上均匀采样
             float z = std::fabs(1.0f - 2.0f * x_1);
+            //phi是在[0,2pi]上均匀采样
             float r = std::sqrt(1.0f - z * z), phi = 2 * M_PI * x_2;
             Vector3f localRay(r*std::cos(phi), r*std::sin(phi), z);
             return toWorld(localRay, N);
@@ -148,7 +154,11 @@ Vector3f Material::sample(const Vector3f &wi, const Vector3f &N){
 float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
     switch(m_type){
         case DIFFUSE:
-        {
+        {   
+            //只有再wo与N的夹角[0,pi/2]之间才会有光线被反射
+            //返回的是wi在半球上的概率密度函数 
+            //因为是均匀采样，那么pdf是一个常数
+            //球面上立体角的积分×pdf=1 =>  pdf=1/2pi
             // uniform sample probability 1 / (2 * PI)
             if (dotProduct(wo, N) > 0.0f)
                 return 0.5f / M_PI;
@@ -162,7 +172,8 @@ float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
 Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
     switch(m_type){
         case DIFFUSE:
-        {
+        {   //判断观察角度是否能够看到
+            //若能看到就返回漫反射贡献值 都是kd/pi
             // calculate the contribution of diffuse   model
             float cosalpha = dotProduct(N, wo);
             if (cosalpha > 0.0f) {

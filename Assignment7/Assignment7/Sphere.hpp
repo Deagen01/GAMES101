@@ -79,6 +79,12 @@ public:
     }
     void Sample(Intersection &pos, float &pdf){
         float theta = 2.0 * M_PI * get_random_float(), phi = M_PI * get_random_float();
+        //x = cos(phi)
+        //y = sin(phi)*cos(theta)
+        //z = sin(phi)*sin(theta)
+        //phi和theta是和平时的定义相反的
+        //相当于x是z轴
+        //y是x轴 z是y轴
         Vector3f dir(std::cos(phi), std::sin(phi)*std::cos(theta), std::sin(phi)*std::sin(theta));
         pos.coords = center + radius * dir;
         pos.normal = dir;
