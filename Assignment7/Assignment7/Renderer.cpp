@@ -33,7 +33,8 @@ void Renderer::Render(const Scene& scene)
                       imageAspectRatio * scale;
             float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
 
-            //为什么是-x,y,1？
+            //为什么是-x,y,1？ 方向是从像素点指向相机位置，且这里的y轴做了一个倒置，不然结果是相反的
+            //类似眼睛
             //关于assignment6
             Vector3f dir = normalize(Vector3f(-x, y, 1));
             for (int k = 0; k < spp; k++){

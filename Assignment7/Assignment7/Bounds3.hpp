@@ -124,10 +124,11 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     //tEnter是最大的进入t值
     float tEnter = std::max(txMin,std::max(tyMin,tzMin));
     float tExit = std::min(txMax,std::min(tyMax,tzMax));
-    //tExit<0且tEnter>0表示光源在物体内部 有且仅有一个交点
-    //所以当tEnter<0则不存在交点
-    if( tEnter < 0){
-        return false;
+    //tExit<0且tEnter>0表示光源在物体内部 有且仅有一个交点？
+    //假设光线从内部发出是没有交点的
+    tExit+=EPSILON;
+    if( tEnter <= tExit && tExit>=0){
+        return true;
     }
     //tExit = tEnter是也有交点的？
     return true;

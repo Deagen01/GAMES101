@@ -234,12 +234,13 @@ inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 inline Intersection Triangle::getIntersection(Ray ray)
 {
     Intersection inter;
-
+    //光线从三角形背面过来 直接返回
     if (dotProduct(ray.direction, normal) > 0)
         return inter;
     double u, v, t_tmp = 0;
     Vector3f pvec = crossProduct(ray.direction, e2);
     double det = dotProduct(e1, pvec);
+    //不是正数 即角度大于等于90度不在三角形内部
     if (fabs(det) < EPSILON)
         return inter;
 
