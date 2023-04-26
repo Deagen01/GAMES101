@@ -76,7 +76,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
         return Vector3f(0.f);
     }
     Vector3f eye_pos = ray.origin;//这是p
-    Vector3f eye_dir = ray.direction;//这是wo
+    Vector3f wo = ray.direction;//这是wo
     Vector3f hitColor = this->backgroundColor;
     //查找该光线与场景的交点
     Intersection hitPoint = intersect(ray);
@@ -84,7 +84,6 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
         return hitColor;
     }
     //判断打到的物体是否发光
-    Vector3f wo = normalize(eye_pos - hitPoint.coords);
     Vector3f L_e = 0.f;
     //物体发光 是L_e 自发光项
     if(hitPoint.m->hasEmission()){
@@ -100,6 +99,10 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     Ray lightRay = Ray(light_pos.coords, normalize(hitPoint.coords - light_pos.coords));
     //判断该光线能否打到hitPoint上
     Intersection lightToHitPointInter = intersect(lightRay);
+    //norm出问题？
+    //distance记录的是
+    //一个是ray 一个是lightRay wi 和 wo
+    //不能比较？o+td呢 
     if(lightToHitPointInter.happened && (lightToHitPointInter.coords - hitPoint.coords).norm() < 0.001){
         //计算直接光照
         Vector3f xx = light_pos.coords;
@@ -119,6 +122,9 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     //若打到发光物体则则属于直接光照 就不处理
     //只有打到未发光物体才属于间接光照要处理
     Vector3f L_indir = 0.f;
+    if(!inter_wi.happened){
+        return L_dir;
+    }
     if(!inter_wi.m->hasEmission()){
         float p_rr = get_random_float();
         //使用俄罗斯轮盘来判断是否追踪光线
