@@ -72,15 +72,16 @@ bool Scene::trace(
 Vector3f Scene::castRay(const Ray &ray, int depth) const
 {
     // TO DO Implement Path Tracing Algorithm here
-    if(depth>maxDepth){
-        return Vector3f{0.f,0.f,0.f};//黑色
-    }
+
     Vector3f eye_pos = ray.origin;//这是p
-    Vector3f wo = ray.direction;//像素指向物体
+    Vector3f wo = normalize(ray.direction);//像素指向物体
     //查找该光线与场景的交点
     Intersection hitPoint = intersect(ray);
+    if(!hitPoint.happened && depth==0){
+        return this->backgroundColor;
+    }
     if(!hitPoint.happened){
-        return this->backgroundColor;//蓝色
+        return Vector3f(0.f);
     }
     //判断打到的物体是否发光
     Vector3f L_e = {0.f,0.f,0.f};
@@ -102,7 +103,6 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     Intersection lightInter = intersect(lightRay);
     if(lightInter.happened && (dis - lightInter.distance) < EPSILON){
         //计算直接光照
-        //和博客不一样？ 我认为的方向是从hitPoint分别指向光源和相机
         Vector3f xx = light_pos.coords;
         Vector3f ws=normalize(hitPoint.coords - xx);//光源指向hitPoint
         Vector3f NN=light_pos.normal;
@@ -119,12 +119,12 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     //若打到发光物体则则属于直接光照 就不处理
     //只有打到未发光物体才属于间接光照要处理
     Vector3f L_indir = {0.f,0.f,0.f};
-    if(!inter_wi.happened){
+    if(!inter_wi.happened){//一定可以打到物体才对
         return L_dir;
     }
     if(!inter_wi.m->hasEmission()){
-        float p_rr = get_random_float();
         //使用俄罗斯轮盘来判断是否追踪光线
+        float p_rr = get_random_float();
         if(p_rr<RussianRoulette){
             Vector3f L_i=castRay(rayWi, depth+1);
             Vector3f f_r = hitPoint.m->eval(wo,wi,hitPoint.normal);
@@ -133,9 +133,13 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
             float dis = (inter_wi.coords-hitPoint.coords).norm();
             float dis2 = dis*dis;
             //这里除以0了
-            if(pdf_wi>EPSILON)
-                L_indir = L_i*f_r*dotProduct(wi,hitPoint.normal)/pdf_wi/RussianRoulette;
+            L_indir = L_i*f_r*dotProduct(wi,hitPoint.normal)/pdf_wi/RussianRoulette;
+            if(L_indir.norm()<EPSILON)
+            {
+                L_indir.x=0.f;
+            }
         }
+
         
     }
 
