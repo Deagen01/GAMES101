@@ -229,21 +229,57 @@ inline bool Triangle::intersect(const Ray& ray, float& tnear,
     return false;
 }
 
-inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
+// inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 
+// inline Intersection Triangle::getIntersection(Ray ray)
+// {
+//     Intersection inter;
+//     //光线从三角形背面过来 直接返回
+//     if (dotProduct(ray.direction, normal) > 0)
+//         return inter;
+//     double u, v, t_tmp = 0;
+//     Vector3f pvec = crossProduct(ray.direction, e2);
+//     double det = dotProduct(e1, pvec);
+//     //不是正数 即角度大于等于90度不在三角形内部
+//     if (fabs(det) < EPSILON)
+//         return inter;
+
+//     double det_inv = 1. / det;
+//     Vector3f tvec = ray.origin - v0;
+//     u = dotProduct(tvec, pvec) * det_inv;
+//     if (u < 0 || u > 1)
+//         return inter;
+//     Vector3f qvec = crossProduct(tvec, e1);
+//     v = dotProduct(ray.direction, qvec) * det_inv;
+//     if (v < 0 || u + v > 1)
+//         return inter;
+//     t_tmp = dotProduct(e2, qvec) * det_inv;
+
+//     // TODO find ray triangle intersection
+//     inter.happened = true;
+//     inter.coords = ray(t_tmp);
+//     inter.m = this->m;
+//     inter.normal = normal;
+//     inter.obj = this;
+//     inter.distance = t_tmp;
+//     return inter;
+    
+// }
+
+inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
+ 
 inline Intersection Triangle::getIntersection(Ray ray)
 {
     Intersection inter;
-    //光线从三角形背面过来 直接返回
+ 
     if (dotProduct(ray.direction, normal) > 0)
         return inter;
     double u, v, t_tmp = 0;
     Vector3f pvec = crossProduct(ray.direction, e2);
     double det = dotProduct(e1, pvec);
-    //不是正数 即角度大于等于90度不在三角形内部
     if (fabs(det) < EPSILON)
         return inter;
-
+ 
     double det_inv = 1. / det;
     Vector3f tvec = ray.origin - v0;
     u = dotProduct(tvec, pvec) * det_inv;
@@ -254,16 +290,19 @@ inline Intersection Triangle::getIntersection(Ray ray)
     if (v < 0 || u + v > 1)
         return inter;
     t_tmp = dotProduct(e2, qvec) * det_inv;
-
+ 
+    if (t_tmp < 0)//t>0 ray是射线
+        return inter;
+ 
     // TODO find ray triangle intersection
-    inter.happened = true;
-    inter.coords = ray(t_tmp);
-    inter.m = this->m;
-    inter.normal = normal;
-    inter.obj = this;
-    inter.distance = t_tmp;
+    //给inter所有参数赋予值
+    inter.happened = true;//有交点
+    inter.coords = ray(t_tmp);//vector3f operator()(double t){return origin+dir*t};
+    inter.normal = normal;//法向量
+    inter.distance = t_tmp;//double distance
+    inter.obj = this;//this是所有成员函数的隐藏函数，一个const指针，指向当前对象（正在使用的对象）
+    inter.m = m;//class 材质 m
     return inter;
-    
 }
 
 inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
