@@ -29,12 +29,13 @@ void Renderer::Render(const Scene& scene)
     for (uint32_t j = 0; j < scene.height; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
             // generate primary ray direction
-            float x = (2 * (i + 0.5) / (float)scene.width - 1) *
-                      imageAspectRatio * scale;
+            float x = (2 * (i + 0.5) / (float)scene.width - 1) * imageAspectRatio * scale;      
+            //2 * (j + 0.5) / (float)scene.height [0,2]             
             float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
 
-            //为什么是-x,y,1？ 方向是从像素点指向相机位置，且这里的y轴做了一个倒置，不然结果是相反的
-            //类似眼睛
+            //为什么是-x,y,1？
+            //x是负到正 y是从正到负 -x,y保证xy 是从正到负 
+            //近平面位于z=1  物体都是在z正轴 所以相机是看向z正轴方向
             //关于assignment6
             Vector3f dir = normalize(Vector3f(-x, y, 1));
             for (int k = 0; k < spp; k++){

@@ -257,12 +257,13 @@ inline Intersection Triangle::getIntersection(Ray ray)
 
     // TODO find ray triangle intersection
     inter.happened = true;
-    inter.coords = ray.origin + ray.direction * t_tmp;
+    inter.coords = ray(t_tmp);
     inter.m = this->m;
     inter.normal = normal;
     inter.obj = this;
     inter.distance = t_tmp;
     return inter;
+    
 }
 
 inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const

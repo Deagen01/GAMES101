@@ -18,7 +18,9 @@ struct Ray{
         t_max = std::numeric_limits<double>::max();
 
     }
-
+    //结构体内定义的函数
+    //operator用于重载运算符
+    //()指的是函数调用 比如声明Ray ray; ray(1.0)就是调用这个函数
     Vector3f operator()(double t) const{return origin+direction*t;}
 
     friend std::ostream &operator<<(std::ostream& os, const Ray& r){

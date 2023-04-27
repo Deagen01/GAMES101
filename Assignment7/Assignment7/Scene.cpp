@@ -74,7 +74,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     // TO DO Implement Path Tracing Algorithm here
 
     Vector3f eye_pos = ray.origin;//这是p
-    Vector3f wo = normalize(ray.direction);//像素指向物体
+    Vector3f wo = ray.direction;//像素指向物体
     //查找该光线与场景的交点
     Intersection hitPoint = intersect(ray);
     if(!hitPoint.happened && depth==0){
@@ -144,4 +144,5 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     }
 
     return L_dir+L_indir;
+
 }
