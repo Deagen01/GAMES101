@@ -229,10 +229,11 @@ inline bool Triangle::intersect(const Ray& ray, float& tnear,
 
 inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 
+ 
 inline Intersection Triangle::getIntersection(Ray ray)
 {
     Intersection inter;
-
+ 
     if (dotProduct(ray.direction, normal) > 0)
         return inter;
     double u, v, t_tmp = 0;
@@ -240,7 +241,7 @@ inline Intersection Triangle::getIntersection(Ray ray)
     double det = dotProduct(e1, pvec);
     if (fabs(det) < EPSILON)
         return inter;
-
+ 
     double det_inv = 1. / det;
     Vector3f tvec = ray.origin - v0;
     u = dotProduct(tvec, pvec) * det_inv;
@@ -251,9 +252,18 @@ inline Intersection Triangle::getIntersection(Ray ray)
     if (v < 0 || u + v > 1)
         return inter;
     t_tmp = dotProduct(e2, qvec) * det_inv;
-
+ 
+    if (t_tmp < 0)//t>0 ray是射线
+        return inter;
+ 
     // TODO find ray triangle intersection
-
+    //给inter所有参数赋予值
+    inter.happened = true;//有交点
+    inter.coords = ray(t_tmp);//vector3f operator()(double t){return origin+dir*t};
+    inter.normal = normal;//法向量
+    inter.distance = t_tmp;//double distance
+    inter.obj = this;//this是所有成员函数的隐藏函数，一个const指针，指向当前对象（正在使用的对象）
+    inter.m = m;//class 材质 m
     return inter;
 }
 
